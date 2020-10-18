@@ -26,8 +26,6 @@ import { UpdateFamilyDto } from './dto/update-family.dto';
 import { FamiliesService } from './families.service';
 import { FamilySerializer } from './serializers/family.serializer';
 
-// TODO: Think about stats fetching
-
 @Controller('families')
 @UseGuards(BearerGuard)
 @UseInterceptors(new ResponseInterceptor(FamilySerializer))
