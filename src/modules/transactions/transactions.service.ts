@@ -73,7 +73,10 @@ export class TransactionsService {
   async getTransactions({
     familyId,
   }: UserEntity): Promise<TransactionEntity[]> {
-    return this.transactionsRepository.find({ family: { id: familyId } });
+    return this.transactionsRepository.find({
+      where: { family: { id: familyId } },
+      relations: ['mainCategory', 'subCategory'],
+    });
   }
 
   async updateTransaction(

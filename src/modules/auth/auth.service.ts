@@ -10,6 +10,7 @@ import { SessionsService } from '../sessions/sessions.service';
 import { SignInDto } from './dto/sign-in.dto';
 import { UserWithTokenSerializer } from './serializers/user-with-token.serializer';
 import { SessionEntity } from '../sessions/session.entity';
+import { UserEntity } from '../users/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -57,5 +58,12 @@ export class AuthService {
 
   async signOut(session: SessionEntity): Promise<void> {
     await this.sessionsService.removeSession(session);
+  }
+
+  async signInGoogle(user: UserEntity): Promise<UserWithTokenSerializer> {
+    const session = await this.sessionsService.createSession(user);
+    const token = this.sessionsService.createToken(session);
+
+    return { user, token };
   }
 }

@@ -18,11 +18,11 @@ export class TransactionSerializer {
   @ApiProperty()
   type: TransactionTypes;
 
-  @ApiProperty()
+  @ApiProperty({ type: TransactionCategorySerializer })
   @Type(() => TransactionCategorySerializer)
   mainCategory: TransactionCategoryEntity;
 
-  @ApiProperty()
+  @ApiProperty({ type: TransactionCategorySerializer })
   @Type(() => TransactionCategorySerializer)
   subCategory: TransactionCategoryEntity;
 

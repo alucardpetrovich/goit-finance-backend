@@ -5,6 +5,5 @@ export const databaseModule = TypeOrmModule.forRootAsync({
   inject: [ConfigService],
   useFactory: async (configService: ConfigService) => ({
     ...configService.get('database'),
-    logging: true,
   }),
 });

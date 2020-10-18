@@ -35,6 +35,17 @@ export class UsersService {
     return this.usersRepository.save(userToUpdate);
   }
 
+  async upsertUser(email: string, username: string): Promise<UserEntity> {
+    await this.usersRepository
+      .createQueryBuilder()
+      .insert()
+      .values({ username, email })
+      .onConflict(`("email") DO NOTHING`)
+      .execute();
+
+    return this.usersRepository.findOne({ email });
+  }
+
   async comparePasswords(
     password: string,
     passwordHash: string,

@@ -6,7 +6,10 @@ import {
   Delete,
   HttpCode,
   UseGuards,
+  Request,
+  Get,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { SignUpDto } from './dto/sign-up.dto';
 import { AuthService } from './auth.service';
 import { SignInDto } from './dto/sign-in.dto';
@@ -27,6 +30,8 @@ import { ResponseInterceptor } from 'src/shared/interceptors/response.intercepto
 import { DSession } from 'src/shared/decorators/session.decorator';
 import { SessionEntity } from '../sessions/session.entity';
 import { BearerGuard } from 'src/shared/guards/bearer.guard';
+import { DUser } from 'src/shared/decorators/user.decorator';
+import { UserEntity } from '../users/user.entity';
 
 @Controller('auth')
 @ApiTags('Auth Controller')
@@ -68,5 +73,26 @@ export class AuthController {
   @ApiNoContentResponse({ description: 'User signed out' })
   async signOut(@DSession() session: SessionEntity): Promise<void> {
     return this.authService.signOut(session);
+  }
+
+  @UseGuards(AuthGuard('google'))
+  @Get('google')
+  @ApiOperation({
+    summary:
+      'Google OAuth endpoint. WARNING!!!! Do not test it from swagger - it should be tested from browser address string',
+  })
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  signInGoogle(@Request() req): void {}
+
+  @UseGuards(AuthGuard('google'))
+  @Get('google/callback')
+  @ApiOperation({
+    summary:
+      'Google OAuth internal endpoint. WARNING!!!! Do not test it from swagger - it should be tested from browser address string',
+  })
+  async signInGoogleCallback(
+    @DUser() user: UserEntity,
+  ): Promise<UserWithTokenSerializer> {
+    return this.authService.signInGoogle(user);
   }
 }
