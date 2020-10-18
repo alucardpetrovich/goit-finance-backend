@@ -43,6 +43,7 @@ export class TransactionsController {
   @ApiOperation({ summary: 'Create new transaction' })
   @ApiBadRequestResponse({ description: 'Validation error' })
   @ApiUnauthorizedResponse({ description: 'Bearer authorization failed' })
+  @ApiForbiddenResponse({ description: 'User does not have family yet' })
   @ApiNotFoundResponse({
     description: 'Transaction main or sub- category not found',
   })
@@ -62,7 +63,6 @@ export class TransactionsController {
 
   @Get()
   @ApiOperation({ summary: 'Get all transactions for logged in user' })
-  @ApiBadRequestResponse({ description: 'Validation error' })
   @ApiUnauthorizedResponse({ description: 'Bearer authorization failed' })
   @ApiOkResponse({
     description: 'Transactions returned',
@@ -102,7 +102,6 @@ export class TransactionsController {
   @Delete(':transactionId')
   @HttpCode(204)
   @ApiOperation({ summary: 'Remove transaction' })
-  @ApiBadRequestResponse({ description: 'Validation error' })
   @ApiUnauthorizedResponse({ description: 'Bearer authorization failed' })
   @ApiNotFoundResponse({ description: 'Transaction not found' })
   @ApiForbiddenResponse({ description: 'User does not owns transaction' })

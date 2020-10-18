@@ -1,6 +1,6 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsEnum, IsString, Length } from "class-validator";
-import { TransactionCategoryTypes } from "../transaction-category-types.enum";
+import { ApiProperty } from '@nestjs/swagger';
+import { IsEnum, IsString, Length } from 'class-validator';
+import { TransactionCategoryTypes } from '../transaction-category-types.enum';
 
 export class CreateCustomCategoryDto {
   @ApiProperty()
@@ -8,7 +8,7 @@ export class CreateCustomCategoryDto {
   @Length(5)
   name: string;
 
-  @ApiProperty()
+  @ApiProperty({ enum: TransactionCategoryTypes })
   @IsEnum(TransactionCategoryTypes)
   type: TransactionCategoryTypes;
 }

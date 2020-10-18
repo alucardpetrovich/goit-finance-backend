@@ -14,6 +14,7 @@ import {
   ApiOperation,
   ApiBadRequestResponse,
   ApiCreatedResponse,
+  ApiForbiddenResponse,
 } from "@nestjs/swagger";
 import { TransactionCategoriesService } from "./transaction-categories.service";
 import { BearerGuard } from "src/shared/guards/bearer.guard";
@@ -37,6 +38,7 @@ export class TransactionCategoriesController {
   @ApiOperation({ summary: "Create new custom category" })
   @ApiBadRequestResponse({ description: "Validation error" })
   @ApiUnauthorizedResponse({ description: "Bearer auth failed" })
+  @ApiForbiddenResponse({ description: 'User does not have family yet' })
   @ApiCreatedResponse({
     description: "Custom transaction category created",
     type: TransactionCategorySerializer,
@@ -46,7 +48,7 @@ export class TransactionCategoriesController {
     @Body() createCustomCategoryDto: CreateCustomCategoryDto
   ): Promise<TransactionCategorySerializer> {
     return this.transactionCategoriesService.createCustomCategory(
-      user.familyId,
+      user,
       createCustomCategoryDto
     );
   }
@@ -61,6 +63,6 @@ export class TransactionCategoriesController {
   async getCategories(
     @DUser() user: UserEntity
   ): Promise<TransactionCategorySerializer[]> {
-    return this.transactionCategoriesService.getCategories(user.familyId);
+    return this.transactionCategoriesService.getCategories(user);
   }
 }

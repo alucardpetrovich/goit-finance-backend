@@ -3,6 +3,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { FamilyEntity } from '../families/family.entity';
+import { TransactionsService } from '../transactions/transactions.service';
 
 @Injectable()
 export class ReplenishFamiliesWithIncomeCron {
@@ -12,6 +13,7 @@ export class ReplenishFamiliesWithIncomeCron {
   constructor(
     @InjectRepository(FamilyEntity)
     private familiesRepository: Repository<FamilyEntity>,
+    private transactionsService: TransactionsService,
   ) {}
 
   @Cron(CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT)
@@ -41,11 +43,12 @@ export class ReplenishFamiliesWithIncomeCron {
       .createQueryBuilder()
       .where('id = :id', { id: family.id })
       .update(FamilyEntity, {
-        balance: () => `"balance" + "totalSalary" + "passiveIncome"`,
+        balance: () => `balance + totalSalary + passiveIncome`,
         // total giftsEarned - giftsUnpacked
         giftsForUnpacking: () =>
           `FLOOR(balance / flatPrice / squares) - giftsUnpacked`,
       })
       .execute();
+    await this.transactionsService.createMonthIncomeTransaction(family.id);
   };
 }

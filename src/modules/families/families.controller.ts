@@ -2,8 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  Patch,
   Post,
-  Put,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -26,7 +26,6 @@ import { UpdateFamilyDto } from './dto/update-family.dto';
 import { FamiliesService } from './families.service';
 import { FamilySerializer } from './serializers/family.serializer';
 
-// TODO: Add unpack gift endpoint
 // TODO: Think about stats fetching
 
 @Controller('families')
@@ -40,9 +39,10 @@ export class FamiliesController {
   @Get()
   @ApiOperation({ summary: 'Get family info' })
   @ApiUnauthorizedResponse({ description: 'Bearer auth failed' })
+  @ApiNotFoundResponse({ description: 'User does not have family yet' })
   @ApiOkResponse({ description: 'Family info returned' })
   async getFamilyInfo(@DUser() user: UserEntity): Promise<FamilySerializer> {
-    return this.familiesService.getFamilyInfo(user.familyId);
+    return this.familiesService.getFamilyInfo(user);
   }
 
   @Post()
@@ -57,7 +57,7 @@ export class FamiliesController {
     return this.familiesService.createFamily(createFamilyDto, user);
   }
 
-  @Put('current')
+  @Patch('current')
   @ApiOperation({ summary: 'Update user family' })
   @ApiUnauthorizedResponse({ description: 'Bearer auth failed' })
   @ApiNotFoundResponse({ description: 'User does not have family yet' })

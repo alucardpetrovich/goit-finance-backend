@@ -11,6 +11,8 @@ import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { UserEntity } from '../users/user.entity';
 import { TransactionCategoriesService } from '../transaction-categories/transaction-categories.service';
 import { FamiliesService } from '../families/families.service';
+import { FamilyEntity } from '../families/family.entity';
+import { TransactionTypes } from './transaction-types.enum';
 
 @Injectable()
 export class TransactionsService {
@@ -25,6 +27,10 @@ export class TransactionsService {
     createTransactionDto: CreateTransactionDto,
     { familyId }: UserEntity,
   ): Promise<TransactionEntity> {
+    if (!familyId) {
+      throw new ForbiddenException('User does not have family yet');
+    }
+
     const { mainCategoryId, subCategoryId, amount } = createTransactionDto;
 
     const [mainCategory, subCategory] = await Promise.all([
@@ -41,6 +47,27 @@ export class TransactionsService {
       amount,
       family: { id: familyId },
     });
+  }
+
+  async createMonthIncomeTransaction(familyId: string): Promise<void> {
+    const qb = this.transactionsRepository.createQueryBuilder('t');
+
+    await qb
+      .insert()
+      .into(TransactionEntity)
+      .values({
+        amount: () =>
+          qb
+            .subQuery()
+            .select('f.totalSalary + f.passiveIncome')
+            .from(FamilyEntity, 'f')
+            .where('id = :familyId', { familyId })
+            .getQuery(),
+        type: TransactionTypes.INCOME,
+        transactionDate: new Date(),
+        familyId,
+      })
+      .execute();
   }
 
   async getTransactions({

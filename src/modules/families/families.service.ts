@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -40,7 +41,11 @@ export class FamiliesService {
     return newFamily;
   }
 
-  async getFamilyInfo(familyId: string): Promise<FamilyEntity> {
+  async getFamilyInfo({ familyId }: UserEntity): Promise<FamilyEntity> {
+    if (!familyId) {
+      throw new NotFoundException(`User does not have family yet`);
+    }
+
     return this.familiesRepository.findOne(familyId);
   }
 
@@ -55,9 +60,10 @@ export class FamiliesService {
 
     const paramsToUpdate: DeepPartial<FamilyEntity> = { ...updateFamilyDto };
     if (updateFamilyDto.flatPrice || updateFamilyDto.flatSquareMeters) {
-      const giftsEarned =
+      const giftPrice =
         (updateFamilyDto.flatPrice || family.flatPrice) /
         (updateFamilyDto.flatSquareMeters || family.flatSquareMeters);
+      const giftsEarned = Math.floor(family.balance / giftPrice);
       paramsToUpdate.giftsForUnpacking = giftsEarned - family.giftsUnpacked;
     }
 
@@ -74,5 +80,29 @@ export class FamiliesService {
       .where('id = :id', { id: familyId })
       .update(FamilyEntity, { balance: () => `balance + ${amount}` })
       .execute();
+  }
+
+  async unpackGift({ familyId }: UserEntity): Promise<{ giftsLeft: number }> {
+    if (!familyId) {
+      throw new ForbiddenException('user does not have family yet');
+    }
+
+    const updateResult = await this.familiesRepository
+      .createQueryBuilder()
+      .where('id = :id', { id: familyId })
+      .andWhere('"giftsForUnpacking" > 0')
+      .update(FamilyEntity)
+      .set({
+        giftsUnpacked: () => `"giftsUnpacked" + 1`,
+        giftsForUnpacking: () => `"giftsForUnpacking" - 1`,
+      })
+      .returning('"giftsForUnpacking"')
+      .execute();
+
+    if (!updateResult.affected) {
+      throw new ConflictException(`There is no gifts no unpack`);
+    }
+
+    return { giftsLeft: updateResult.raw[0].giftsForUnpacking };
   }
 }

@@ -14,9 +14,6 @@ export class UserSerializer {
   @Exclude()
   passwordHash: string;
 
-  @ApiProperty()
-  balance: number;
-
   @Exclude()
   createdAt: Date;
 

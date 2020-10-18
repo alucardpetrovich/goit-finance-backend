@@ -6,11 +6,11 @@ import { TransactionCategoriesModule } from './modules/transaction-categories/tr
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { SessionsModule } from './modules/sessions/sessions.module';
-import { TransactionsSummaryModule } from './modules/transactions-summary/transactions-summary.module';
 import { FamiliesModule } from './modules/families/families.module';
 import { FinanceStatsModule } from './modules/finance-stats/finance-stats.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { IncomesModule } from './modules/incomes/incomes.module';
+import { GiftsModule } from './modules/gifts/gifts.module';
 
 @Module({
   imports: [
@@ -23,9 +23,9 @@ import { IncomesModule } from './modules/incomes/incomes.module';
     TransactionsModule,
     TransactionCategoriesModule,
     AuthModule,
-    TransactionsSummaryModule,
     FamiliesModule,
     FinanceStatsModule,
+    GiftsModule,
   ],
   controllers: [],
   providers: [],
