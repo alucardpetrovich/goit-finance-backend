@@ -21,8 +21,8 @@ export class UserEntity {
   @Column({ unique: true })
   email: string;
 
-  @Column()
-  passwordHash: string;
+  @Column({ nullable: true })
+  passwordHash?: string;
 
   @RelationId((user: UserEntity) => user.family)
   familyId: string;

@@ -8,6 +8,7 @@ import {
   UseGuards,
   Request,
   Get,
+  Redirect,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { SignUpDto } from './dto/sign-up.dto';
@@ -32,12 +33,16 @@ import { SessionEntity } from '../sessions/session.entity';
 import { BearerGuard } from 'src/shared/guards/bearer.guard';
 import { DUser } from 'src/shared/decorators/user.decorator';
 import { UserEntity } from '../users/user.entity';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('auth')
 @ApiTags('Auth Controller')
 @UseInterceptors(new ResponseInterceptor(UserWithTokenSerializer))
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private configService: ConfigService,
+  ) {}
 
   @Post('sign-up')
   @ApiOperation({ summary: 'Sign up new user' })
@@ -86,13 +91,18 @@ export class AuthController {
 
   @UseGuards(AuthGuard('google'))
   @Get('google/callback')
+  @Redirect()
   @ApiOperation({
     summary:
       'Google OAuth internal endpoint. WARNING!!!! Do not test it from swagger - it should be tested from browser address string',
   })
-  async signInGoogleCallback(
-    @DUser() user: UserEntity,
-  ): Promise<UserWithTokenSerializer> {
-    return this.authService.signInGoogle(user);
+  async signInGoogleCallback(@DUser() user: UserEntity): Promise<any> {
+    const userWithToken = await this.authService.signInGoogle(user);
+    return {
+      statusCode: 302,
+      url: `${this.configService.get('api.frontendOrigin')}?token=${
+        userWithToken.token
+      }`,
+    };
   }
 }

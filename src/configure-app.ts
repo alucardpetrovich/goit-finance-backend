@@ -18,7 +18,7 @@ export function configureApp(
     }),
   );
   app.enableCors({
-    origin: configService.get<string>('api.allowedCorsOrigin'),
+    origin: configService.get<string>('api.frontendOrigin'),
   });
   app.use(
     (helmet as any)({

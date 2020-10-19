@@ -15,11 +15,11 @@ export const apiConfig = registerAs('api', () => {
       default: null,
       env: 'PORT',
     },
-    allowedCorsOrigin: {
+    frontendOrigin: {
       doc: 'Front-end origin, for which we allow CORS requests',
       format: String,
       default: null,
-      env: 'CORS_ALLOWED_ORIGIN',
+      env: 'FRONTEND_ORIGIN',
     }
   })
     .validate()

@@ -12,7 +12,7 @@ export class UserSerializer {
   email: string;
 
   @Exclude()
-  passwordHash: string;
+  passwordHash?: string;
 
   @Exclude()
   createdAt: Date;
