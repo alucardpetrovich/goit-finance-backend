@@ -76,7 +76,7 @@ export class TransactionsService {
       .select('SUM(t.amount)', 'sum')
       .where('"familyId" = :familyId', { familyId })
       .andWhere('EXTRACT(MONTH FROM t.transactionDate) = :month', {
-        month: 11,
+        month: sqlMonthNum,
       })
       .andWhere('type = :type', { type: TransactionTypes.EXPENSE })
       .getRawOne();
@@ -117,7 +117,10 @@ export class TransactionsService {
 
     const amountDiff = (amount || 0) - transaction.amount;
     if (amountDiff) {
-      await this.familiesService.updateFamilyBalance(user.familyId, -amountDiff);
+      await this.familiesService.updateFamilyBalance(
+        user.familyId,
+        -amountDiff,
+      );
     }
 
     const transactionToUpdate = this.transactionsRepository.merge(
