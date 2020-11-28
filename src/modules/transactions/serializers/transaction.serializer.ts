@@ -20,11 +20,10 @@ export class TransactionSerializer {
 
   @ApiProperty({ type: TransactionCategorySerializer })
   @Type(() => TransactionCategorySerializer)
-  mainCategory: TransactionCategoryEntity;
+  category: TransactionCategoryEntity;
 
-  @ApiProperty({ type: TransactionCategorySerializer })
-  @Type(() => TransactionCategorySerializer)
-  subCategory: TransactionCategoryEntity;
+  @ApiProperty()
+  comment: string;
 
   @Exclude()
   family: FamilyEntity;
@@ -33,10 +32,7 @@ export class TransactionSerializer {
   familyId: string;
 
   @Exclude()
-  mainCategoryId: string;
-
-  @Exclude()
-  subCategoryId: string;
+  categoryId: string;
 
   @Exclude()
   createdAt: Date;

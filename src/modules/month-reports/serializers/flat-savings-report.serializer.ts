@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class FlatSavingsStatsSerializer {
+export class FlatSavingsReportSerializer {
   @ApiProperty()
   savingsPercentage: number;
 

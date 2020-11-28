@@ -7,9 +7,8 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { SessionsModule } from './modules/sessions/sessions.module';
 import { FamiliesModule } from './modules/families/families.module';
-import { FinanceStatsModule } from './modules/finance-stats/finance-stats.module';
 import { ScheduleModule } from '@nestjs/schedule';
-import { IncomesModule } from './modules/incomes/incomes.module';
+import { MonthReportsModule } from './modules/month-reports/month-reports.module';
 import { GiftsModule } from './modules/gifts/gifts.module';
 
 @Module({
@@ -17,14 +16,14 @@ import { GiftsModule } from './modules/gifts/gifts.module';
     configModule,
     databaseModule,
     ScheduleModule.forRoot(),
-    IncomesModule,
+    MonthReportsModule,
     SessionsModule,
     UsersModule,
     TransactionsModule,
     TransactionCategoriesModule,
     AuthModule,
     FamiliesModule,
-    FinanceStatsModule,
+    MonthReportsModule,
     GiftsModule,
   ],
   controllers: [],

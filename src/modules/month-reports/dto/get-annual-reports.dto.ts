@@ -1,12 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsInt } from 'class-validator';
 
-export class GetMonthStatsDto {
+export class GetAnnualReportsDto {
   @ApiProperty()
   @IsInt()
-  year: number;
+  endYear: number;
 
   @ApiProperty()
   @IsInt()
-  month: number;
+  endMonth: number;
 }

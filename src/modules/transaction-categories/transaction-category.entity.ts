@@ -8,7 +8,6 @@ import {
   RelationId,
 } from 'typeorm';
 import { FamilyEntity } from '../families/family.entity';
-import { TransactionCategoryTypes } from './transaction-category-types.enum';
 
 @Entity('transaction_categories')
 export class TransactionCategoryEntity {
@@ -17,9 +16,6 @@ export class TransactionCategoryEntity {
 
   @Column()
   name: string;
-
-  @Column({ enum: TransactionCategoryTypes })
-  type: TransactionCategoryTypes;
 
   @RelationId((category: TransactionCategoryEntity) => category.family)
   familyId: string;

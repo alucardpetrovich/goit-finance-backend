@@ -1,17 +1,17 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsUUID, Max } from 'class-validator';
+import { IsNumber, IsString, IsUUID, Min } from 'class-validator';
 
 export class CreateTransactionDto {
   @ApiProperty()
   @IsUUID()
-  mainCategoryId: string;
+  categoryId: string;
 
   @ApiProperty()
-  @IsUUID()
-  subCategoryId: string;
+  @IsString()
+  comment: string;
 
   @ApiProperty()
   @IsNumber()
-  @Max(0, { message: 'Transaction amount should be negative' })
+  @Min(0.01, { message: 'Transaction amount should be positive' })
   amount: number;
 }

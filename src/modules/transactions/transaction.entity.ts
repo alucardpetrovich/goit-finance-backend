@@ -20,25 +20,21 @@ export class TransactionEntity {
   @Column('float')
   amount: number;
 
-  @Column('date')
+  @Column('date', { default: () => 'CURRENT_DATE' })
   transactionDate: Date;
 
   @Column({ enum: TransactionTypes, default: TransactionTypes.EXPENSE })
   type: TransactionTypes;
 
-  @RelationId((transaction: TransactionEntity) => transaction.mainCategory)
-  mainCategoryId: string;
+  @Column()
+  comment: string;
+
+  @RelationId((transaction: TransactionEntity) => transaction.category)
+  categoryId: string;
 
   @ManyToOne(() => TransactionCategoryEntity)
   @JoinColumn()
-  mainCategory: TransactionCategoryEntity;
-
-  @RelationId((transaction: TransactionEntity) => transaction.subCategory)
-  subCategoryId: string;
-
-  @ManyToOne(() => TransactionCategoryEntity)
-  @JoinColumn()
-  subCategory: TransactionCategoryEntity;
+  category: TransactionCategoryEntity;
 
   @RelationId((transaction: TransactionEntity) => transaction.family)
   familyId: string;

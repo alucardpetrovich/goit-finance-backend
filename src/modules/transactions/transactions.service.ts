@@ -11,7 +11,6 @@ import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { UserEntity } from '../users/user.entity';
 import { TransactionCategoriesService } from '../transaction-categories/transaction-categories.service';
 import { FamiliesService } from '../families/families.service';
-import { FamilyEntity } from '../families/family.entity';
 import { TransactionTypes } from './transaction-types.enum';
 
 @Injectable()
@@ -31,43 +30,32 @@ export class TransactionsService {
       throw new ForbiddenException('User does not have family yet');
     }
 
-    const { mainCategoryId, subCategoryId, amount } = createTransactionDto;
-
-    const [mainCategory, subCategory] = await Promise.all([
-      this.transactionCategoriesService.getCategoryById(mainCategoryId),
-      this.transactionCategoriesService.getCategoryById(subCategoryId),
-    ]);
+    const { categoryId, comment, amount } = createTransactionDto;
+    const category = await this.transactionCategoriesService.getCategoryById(
+      categoryId,
+    );
 
     await this.familiesService.updateFamilyBalance(familyId, amount);
 
     return this.transactionsRepository.save({
-      transactionDate: new Date(),
-      mainCategory,
-      subCategory,
+      category,
+      comment,
       amount,
       family: { id: familyId },
     });
   }
 
-  async createMonthIncomeTransaction(familyId: string): Promise<void> {
-    const qb = this.transactionsRepository.createQueryBuilder('t');
-
-    await qb
-      .insert()
-      .into(TransactionEntity)
-      .values({
-        amount: () =>
-          qb
-            .subQuery()
-            .select('f.totalSalary + f.passiveIncome')
-            .from(FamilyEntity, 'f')
-            .where('id = :familyId', { familyId })
-            .getQuery(),
-        type: TransactionTypes.INCOME,
-        transactionDate: new Date(),
-        familyId,
-      })
-      .execute();
+  async createMonthIncomeTransaction(
+    familyId: string,
+    incomeAmount: number,
+  ): Promise<TransactionEntity> {
+    return this.transactionsRepository.save({
+      amount: incomeAmount,
+      type: TransactionTypes.INCOME,
+      transactionDate: new Date(),
+      family: { id: familyId },
+      comment: 'INCOME TRANSACTION',
+    });
   }
 
   async getTransactions({
@@ -75,8 +63,25 @@ export class TransactionsService {
   }: UserEntity): Promise<TransactionEntity[]> {
     return this.transactionsRepository.find({
       where: { family: { id: familyId } },
-      relations: ['mainCategory', 'subCategory'],
+      relations: ['category'],
     });
+  }
+
+  async getExpensesAmountForMonth(
+    familyId: string,
+    sqlMonthNum: number,
+  ): Promise<number> {
+    const { sum } = await this.transactionsRepository
+      .createQueryBuilder('t')
+      .select('SUM(t.amount)', 'sum')
+      .where('"familyId" = :familyId', { familyId })
+      .andWhere('EXTRACT(MONTH FROM t.transactionDate) = :month', {
+        month: 11,
+      })
+      .andWhere('type = :type', { type: TransactionTypes.EXPENSE })
+      .getRawOne();
+
+    return sum;
   }
 
   async updateTransaction(
@@ -84,7 +89,7 @@ export class TransactionsService {
     updateTransactionDto: UpdateTransactionDto,
     user: UserEntity,
   ): Promise<TransactionEntity> {
-    const { mainCategoryId, subCategoryId, amount } = updateTransactionDto;
+    const { categoryId, amount } = updateTransactionDto;
 
     const paramsToUpdate: DeepPartial<TransactionEntity> = {
       ...updateTransactionDto,
@@ -103,22 +108,16 @@ export class TransactionsService {
       throw new ForbiddenException(`User does not owns transaction`);
     }
 
-    if (mainCategoryId) {
-      const mainCategory = await this.transactionCategoriesService.getCategoryById(
-        mainCategoryId,
+    if (categoryId) {
+      const category = await this.transactionCategoriesService.getCategoryById(
+        categoryId,
       );
-      paramsToUpdate.mainCategory = mainCategory;
-    }
-    if (subCategoryId) {
-      const subCategory = await this.transactionCategoriesService.getCategoryById(
-        subCategoryId,
-      );
-      paramsToUpdate.subCategory = subCategory;
+      paramsToUpdate.category = category;
     }
 
     const amountDiff = (amount || 0) - transaction.amount;
     if (amountDiff) {
-      await this.familiesService.updateFamilyBalance(user.familyId, amountDiff);
+      await this.familiesService.updateFamilyBalance(user.familyId, -amountDiff);
     }
 
     const transactionToUpdate = this.transactionsRepository.merge(
@@ -148,7 +147,7 @@ export class TransactionsService {
 
     await this.familiesService.updateFamilyBalance(
       user.familyId,
-      0 - transaction.amount,
+      transaction.amount,
     );
 
     await this.transactionsRepository.remove(transaction);
